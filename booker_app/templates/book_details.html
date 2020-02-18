@@ -1,0 +1,22 @@
+{% include 'partials/header.html' %}
+{% load static %}
+
+    {% if form_book %}
+        <form action='.' method="post">
+            {% csrf_token %}
+            {{ form_book.as_p }}
+            {% for ident in forms_ident %}
+                {{ ident.as_p }}
+            {% endfor %}
+            <input type="submit" value="Update this book"/>
+        </form>
+            <br>
+        <form action='delete_book/' method="post">
+            {% csrf_token %}
+            <input type="submit" value="Delete this book"/>
+        </form>
+    {% else %}
+        <p>The book wasn't added yet.</p>
+    {% endif %}
+
+{% include 'partials/footer.html' %}

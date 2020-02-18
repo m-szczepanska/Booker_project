@@ -1,0 +1,12 @@
+{% include 'partials/header.html' %}
+{% load static %}
+    <form action="{% url 'add_book' %}" method="post">
+        {% csrf_token %}
+        <h2>Add book</h2>
+            {{ form_book.as_p }}
+            {{ form_ident.as_p}}
+
+        <button type="submit" class="save btn btn-default">Save</button>
+    </form>
+
+{% include 'partials/footer.html' %}

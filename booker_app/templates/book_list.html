@@ -1,0 +1,46 @@
+{% include 'partials/header.html' %}
+{% load static %}
+    <div class="body">
+        <header>
+            Book list
+            <hr>
+        </header>
+
+        {% if book_list %}
+
+            <div class="book">
+                <ol>
+                    {% for book in book_list %}
+                    <li>
+                        Title: {{ book.title}},
+                        <br>
+                        Authors: {{ book.authors }},
+                        <br>
+                        Published date: {{ book.pub_date }},
+                        <br>
+                        Language: {{ book.language }},
+                        <br>
+                        Page count: {{ book.page_count }},
+                        <br>
+                        {% for ident in book.identifier_display %}
+                            Identifier: {{ ident }},
+                        {% endfor %}
+                        <br><a href="{{ book.cover_image_adress }}">
+                        Book cover adress: {{ book.cover_image_adress }}</a>
+                        <br><a href="/booker_app/book_details/{{ book.id }}">
+                        Click to see details</a>
+                    </li>
+                    <hr>
+                    {% endfor %}
+                </ol>
+
+
+            </div>
+            {% else %}
+                <p>Any book wasn't added yet.</p>
+            {% endif %}
+
+
+    </div>
+
+{% include 'partials/footer.html' %}
