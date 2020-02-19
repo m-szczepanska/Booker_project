@@ -1,19 +1,46 @@
+import json
+import requests
+from datetime import datetime
+
+from django.db.models import Q
 from django.shortcuts import render, redirect, reverse
 from django.http import (
     HttpResponse, HttpResponseNotFound, HttpResponseRedirect, JsonResponse
 )
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic.edit import DeleteView
 
-from booker_app.forms import BookForm, IdentifierForm
+from booker_app.forms import (BookForm, IdentifierForm, SearchBookForm,
+    ImportBookForm
+)
 from booker_app.models import Book, Identifier
 
 
 class BookView(View):
     def get(self, request):
         book_list = Book.objects.all()
-        context = {'book_list': book_list}
+        form = SearchBookForm()
+        context = {'book_list': book_list, 'form': form}
+        return render(request, 'book_list.html', context)
+
+    def post(self, request, *args, **kwargs):
+        form = SearchBookForm(request.POST)
+        if not form.is_valid():  # TODO fix redirect
+            return redirect('book_list')
+        search_phrase = form.cleaned_data['search_field']
+        search_result = Book.objects.filter(
+            Q(authors__icontains=search_phrase) |
+            Q(title__icontains=search_phrase) |
+            Q(language__icontains=search_phrase) |
+            Q(pub_date__icontains=search_phrase)
+        )
+        search_result_json = form.cleaned_data['json']
+
+        if search_result_json:
+            search_result_rest = list(search_result.values())
+            return JsonResponse(search_result_rest, safe=False)
+
+        context = {'book_list': search_result}
         return render(request, 'book_list.html', context)
 
 
@@ -84,7 +111,7 @@ class BookDetailsView(View):
             for ident_form in forms_ident:
                 if ident_form.is_valid():
                     ident = ident_form.save(commit=False)
-                    ident.book=book
+                    ident.book = book
                     ident.save()
                     return redirect('book_list')
                 else:
@@ -137,3 +164,139 @@ class BookDelete(View):
             return HttpResponseRedirect(reverse('book_list'))
         else:
           return HttpResponseNotFound('<h1>Book not found</h1>')
+
+
+class ImportBookView(View):
+    """https://www.googleapis.com/books/v1/volumes?q=search+terms"""
+    def get(self, request):
+        form = ImportBookForm()
+        return render(request, 'import_book.html', {'form': form})
+
+    def post(self, request, *args):
+        form = ImportBookForm(request.POST)
+        if form.is_valid():
+            search_authors = form.cleaned_data['search_authors']
+            search_title = form.cleaned_data['search_title']
+            search_isbn = form.cleaned_data['search_isbn']
+            search_lccn = form.cleaned_data['search_lccn']
+            search_oclc = form.cleaned_data['search_oclc']
+        else:
+            error_msg = 'Fill in at least one field to import books.'
+            context = {'error_msg': error_msg}
+            return render(request, 'import_book.html', context)
+
+        keywords_fields = {
+            'inauthor': search_authors,
+            'intitle': search_title,
+            'isbn': search_isbn,
+            'lccn': search_lccn,
+            'oclc': search_oclc
+        }
+
+        volume_infos = self.call_google_api(keywords_fields)
+        if not volume_infos:
+            error_msg = 'No volumes found. Change your search terms.'
+            context = {'error_msg': error_msg}
+            return render(request, 'book_list.html', context)
+
+        success_msg = ''
+        for item in volume_infos:
+            book_exists = None  # we don't know if a book exists in our db
+            ident_instances = []  # to be saved after the book
+            for ident in item.get('industryIdentifiers', []):
+                type = ident['type']
+                value = ident['identifier']
+                identifier = Identifier.objects.filter(
+                    type=type,
+                    value=value
+                ).first()
+                # Hack to break out of outer loop
+                if identifier:
+                    book_exists = True
+                    break
+                else:
+                    # Idents that we will want to save; need a book instance
+                    # for the Foreign Key first
+                    ident_instances.append(Identifier(type=type, value=value))
+
+            if book_exists:
+                continue
+
+            authors = ','.join(item['authors'])  # authors is a list
+            title = item['title']
+            pub_date = self.clean_date(item['publishedDate'])
+            page_count = item.get('pageCount')  # optional
+            language = item['language']
+            cover_image_adress = item.get('imageLinks', {}).get('thumbnail')
+
+            # If no idents exist we don't want to duplicate the book
+            if not ident_instances and self.check_if_book_exists(
+                authors, title, pub_date, page_count, language,
+                cover_image_adress):
+
+                continue
+
+            book = Book(
+                authors=authors,
+                title=title,
+                pub_date=pub_date,
+                page_count=page_count,
+                language=language,
+                cover_image_adress=cover_image_adress
+            )
+            book.save()
+            for ident in ident_instances:
+                ident.book = book
+                ident.save()
+
+            success_msg += f'"{book.title}" added successfully to the database.'
+
+        return render(
+            request,
+            'book_list.html',
+            {'success_msg': success_msg}
+        )
+
+    def call_google_api(self, keywords_fields):
+        valid_fields = [
+            f'{key_field}:{keywords_fields[key_field]}' for key_field
+            in keywords_fields.keys() if keywords_fields[key_field]
+        ]
+        url = 'https://www.googleapis.com/books/v1/volumes'
+        params = {'q': f'{valid_field}' for valid_field in valid_fields}
+        response_bytes = requests.get(url, params=params)
+        response = response_bytes.content.decode("utf-8")
+        # Check if user found any book. If not return None.
+        response_check = json.loads(response)["totalItems"]
+        if not response_check:
+            return None
+
+        response = json.loads(response)['items']
+        return [item['volumeInfo'] for item in response]
+
+    def clean_date(self, pub_date):
+        # Hack for date_pub if only a year or a year and a month are
+        # specified
+        if len(pub_date) < 5:
+            pub_date += '-01-01'
+        elif len(pub_date) < 8:
+            pub_date += '-01'
+        return datetime.strptime(pub_date, '%Y-%m-%d')
+
+    def check_if_book_exists(
+        self,
+        authors,
+        title,
+        pub_date,
+        page_count,
+        language,
+        cover_image_adress):
+
+        return Book.objects.filter(
+            authors=authors,
+            title=title,
+            pub_date=pub_date,
+            page_count=page_count,
+            language=language,
+            cover_image_adress=cover_image_adress
+        ).first()

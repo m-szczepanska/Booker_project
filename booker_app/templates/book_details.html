@@ -1,22 +1,81 @@
 {% include 'partials/header.html' %}
 {% load static %}
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <a class="navbar-brand" href="/booker_app/book_list">Booker App</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarCollapse">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/booker_app/add_book">Add a book</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/booker_app/import_book">Import a book</a>
+      </li>
+    </ul>
+    <form class="form-inline mt-2 mt-md-0" action="." method="post">
+        {% csrf_token %}
+      <input class="form-control mr-sm-2" id="id_search_field" name="search_field" placeholder="Search" aria-label="Search">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form>
+  </div>
+</nav>
 
+<main role="main" class="container">
+  <div class="jumbotron">
+      <h2>Book details</h2>
+      <hr>
     {% if form_book %}
         <form action='.' method="post">
             {% csrf_token %}
-            {{ form_book.as_p }}
+        <div class="container">
+            <div class="row justify-content-md-left">
+              <div class="col-3 col-sm-2 my-2">Title</div>
+              <div class="col-3 col-sm-2 my-2">{{ form_book.title }}</div>
+              <div class="w-100"></div>
+              <div class="col-3 col-sm-2 my-2">Authors</div>
+              <div class="col-3 col-sm-2 my-2">{{ form_book.authors }}</div>
+              <div class="w-100"></div>
+              <div class="col-3 col-sm-2 my-2">Published date</div>
+              <div class="col-3 col-sm-2 my-2">{{ form_book.pub_date }}</div>
+              <div class="w-100"></div>
+              <div class="col-3 col-sm-2 my-2">Language</div>
+              <div class="col-3 col-sm-2 my-2">{{ form_book.language }}</div>
+              <div class="w-100"></div>
+              <div class="col-3 col-sm-2 my-2">Page count</div>
+              <div class="col-3 col-sm-2 my-2">{{ form_book.page_count }}</div>
+              <div class="w-100"></div>
+              <div class="col-3 col-sm-2 my-2">Cover adress image</div>
+              <div class="col-3 col-sm-2 my-2">{{ form_book.cover_image_adress }}</div>
+              <div class="w-100"></div>
             {% for ident in forms_ident %}
-                {{ ident.as_p }}
-            {% endfor %}
-            <input type="submit" value="Update this book"/>
-        </form>
-            <br>
-        <form action='delete_book/' method="post">
-            {% csrf_token %}
-            <input type="submit" value="Delete this book"/>
-        </form>
+                <div class="col-3 col-sm-2 my-2">Identifier type</div>
+                <div class="col-3 col-sm-2 my-2">{{ ident.type }}</div>
+                <div class="w-100"></div>
+                <div class="col-3 col-sm-2 my-2">Identifier value</div>
+                <div class="col-3 col-sm-2 my-2">{{ ident.value }}</div>
+                <div class="w-100"></div>
+             {% endfor %}
+             <hr>
+             <div class="col-3 col-sm-2 my-2">
+                 <button type="submit" class="save btn btn-info">
+                     Update book
+                 </button>
+            </div>
+            <div class="col-3 col-sm-2 my-2">
+                <form action='delete_book/' method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="save btn btn-warning">Delete book</button>
+                </form>
+           </div>
+
+            </div>
+        </div>
+
     {% else %}
         <p>The book wasn't added yet.</p>
     {% endif %}
-
+  </div>
+</main>
 {% include 'partials/footer.html' %}
