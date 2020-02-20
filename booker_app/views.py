@@ -239,11 +239,12 @@ class ImportBookView(View):
             if book_exists:
                 continue
 
-            authors = ','.join(item['authors'])  # authors is a list
+            # authors is a list; a book can sometimes miss authors as well.
+            authors = ','.join(item.get('authors', []))
             title = item['title']
-            pub_date = self.clean_date(item['publishedDate'])
+            pub_date = self.clean_date(item.get('publishedDate'))
             page_count = item.get('pageCount')  # optional
-            language = item['language']
+            language = item.get('language')
             cover_image_adress = item.get('imageLinks', {}).get('thumbnail')
 
             # If no idents exist we don't want to duplicate the book
