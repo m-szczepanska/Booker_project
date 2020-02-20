@@ -1,1 +1,1 @@
-web: gunicorn <Booker>.wsgi --log-file -
+web: gunicorn booker.wsgi --log-file -
