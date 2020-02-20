@@ -31,8 +31,6 @@
         <div class="row justify-content-md-left">
         {% for book in book_list %}
           <div class="col-6 my-2">
-            <ol>
-                <li>
                     Title: {{ book.title}},
                     <br>
                     Authors: {{ book.authors }},
@@ -49,10 +47,8 @@
 
                     <br><a class='details' href="/booker_app/book_details/{{ book.id }}">
                         Click to see details</a>
-                    </li>
                     <hr>
 
-                </ol>
             </div>
             <div class="col-6 my-2">
                 {% if book.cover_image_adress %}
