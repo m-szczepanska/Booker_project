@@ -266,7 +266,7 @@ class ImportBookView(View):
                 ident.book = book
                 ident.save()
 
-            success_msg += (f'"{book.title}" imported to the database.\n'
+            success_msg += f'"{book.title}" imported to the database.\n'
 
         return render(
             request,
