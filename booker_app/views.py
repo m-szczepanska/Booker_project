@@ -229,8 +229,8 @@ class ImportBookView(View):
                     book_exists = True
                     break
                 else:
-                    # Idents that we will want to save; need a book instance
-                    # for the Foreign Key first
+                    # Idents that we will want to save, but need a book
+                    # instance for the Foreign Key
                     ident_instances.append(Identifier(type=type, value=value))
 
             if book_exists:
