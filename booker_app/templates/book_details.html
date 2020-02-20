@@ -63,6 +63,9 @@
                      Update book
                  </button>
             </div>
+           </div>
+        </div>
+        </form>
             <div class="col-3 col-sm-2 my-2">
                 <form action='delete_book/' method="post">
                     {% csrf_token %}
@@ -71,11 +74,9 @@
            </div>
 
             </div>
-        </div>
 
     {% else %}
         <p>The book wasn't added yet.</p>
     {% endif %}
-  </div>
 </main>
 {% include 'partials/footer.html' %}

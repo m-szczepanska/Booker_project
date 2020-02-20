@@ -180,7 +180,7 @@ class BookDelete(View):
             book.delete()
             return HttpResponseRedirect(reverse('book_list'))
         else:
-          return HttpResponseNotFound('<h1>Book not found</h1>')
+          return HttpResponseRedirect(reverse('book_list'))
 
 
 class ImportBookView(View):
@@ -266,7 +266,7 @@ class ImportBookView(View):
                 ident.book = book
                 ident.save()
 
-            success_msg += f'"{book.title}" imported to the database.\n'
+            success_msg += f'"{book.title}" imported to the database. '
 
         return render(
             request,
