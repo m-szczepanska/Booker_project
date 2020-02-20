@@ -46,9 +46,22 @@ class BookView(View):
 
 class BookListJsonView(View):
     def get(self, request):
-        book_list = list(Book.objects.values())
-        context = {'book_list': book_list}
-        return JsonResponse(book_list, safe=False)
+        """Search keyword should be passed through the URL as a querystring
+        in the following format:
+        ?authors=[AUTHORS]&title=[TITLE]&language=[LANGUAGE]&pub_date=[YYYY-MM-DD]
+        """
+        authors = request.GET.get('authors', '')
+        title = request.GET.get('title', '')
+        language = request.GET.get('language', '')
+        pub_date = request.GET.get('pub_date', '')
+        search_result = list(Book.objects.filter(
+            authors__icontains=authors,
+            title__icontains=title,
+            language__icontains=language,
+            pub_date__icontains=pub_date
+        ).values())
+
+        return JsonResponse(search_result, safe=False)
 
 
 class BookDetailsView(View):
@@ -79,6 +92,7 @@ class BookDetailsView(View):
         context = {'form_book': form_book, 'forms_ident': forms_ident}
         return render(request, 'book_details.html', context)
 
+    # TODO: Check if book exists first
     def post(self, request, book_id):
         book = Book.objects.get(id=book_id)
         if not book:
