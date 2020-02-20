@@ -174,6 +174,9 @@ class BookDelete(View):
     def post(self, request, id):
         book = Book.objects.get(id=id)
         if book:
+            idents = Identifier.objects.filter(book_id=book.id).all()
+            for ident in idents:
+                ident.delete()
             book.delete()
             return HttpResponseRedirect(reverse('book_list'))
         else:
@@ -263,7 +266,7 @@ class ImportBookView(View):
                 ident.book = book
                 ident.save()
 
-            success_msg += f'"{book.title}" added successfully to the database.'
+            success_msg += (f'"{book.title}" imported to the database.\n'
 
         return render(
             request,
