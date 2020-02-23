@@ -138,7 +138,7 @@ class BookDetailsView(View):
                 return render(request, 'book_details', context)
 
         else:
-            context = {'form_book': form_book, 'forms_ident': forms_ident}
+            context = {'form_book': form_book, 'form_ident': form_ident}
             return render(request, 'book_details', context)
 
 
