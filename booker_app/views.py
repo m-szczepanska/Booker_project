@@ -111,12 +111,26 @@ class BookDetailsView(View):
         form_ident = IdentifierForm(request.POST)
 
         if form_book.is_valid():
-            form_book.save()
+            form_book.save(commit=False)
 
             if form_ident.is_valid():
                 for ident_type in Identifier.IDENTIFIER_TYPES:
                     ident_type = ident_type[0]  # Pick a value from the tuple
                     if form_ident.cleaned_data[ident_type]:
+                        # check if ident value exists in other book.
+                        ident_exist_in_other_book = Identifier.objects.filter(
+                            type=ident_type,
+                            value=form_ident.cleaned_data[ident_type]
+                        ).first()
+                        if (ident_exist_in_other_book and
+                            ident_exist_in_other_book.book_id != book.id):
+                            error_msg = "Book with this identifier already exists."
+                            return render(
+                                request,
+                                'book_list.html',
+                                {'error_msg': error_msg}
+                            )
+                        form_book.save()
                         if ident_type in ident_types_in_book:
                             ident_to_update = Identifier.objects.filter(
                                 book_id=book.id, type=ident_type
@@ -139,8 +153,8 @@ class BookDetailsView(View):
                         }
                         return render(request, 'book_details.html', context)
             else:
-                invalid_indent_form = "Updating failed. Invalid indentifier."
-                context = {'invalid_indent_form': invalid_indent_form}
+                error_msg = "Updating failed. Invalid indentifier."
+                context = {'error_msg': error_msg}
                 return render(request, 'book_details.html', context)
 
         else:
