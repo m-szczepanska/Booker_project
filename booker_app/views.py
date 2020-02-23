@@ -169,7 +169,6 @@ class BookFormView(View):
 
         book_exists = None
         ident_instances = []
-        error_msg = ''
         if form_ident.is_valid():
             for ident_type in Identifier.IDENTIFIER_TYPES:
                 ident_type = ident_type[0]  # Pick a value from the tuple
@@ -308,8 +307,7 @@ class ImportBookView(View):
         volume_infos = self.call_google_api(keywords_fields)
         if not volume_infos:
             error_msg = 'No volumes found. Change your search terms.'
-            context = {'error_msg': error_msg}
-            return render(request, 'book_list.html', context)
+            return render(request, 'book_list.html', {'error_msg': error_msg})
 
         success_msg = ''
         for item in volume_infos:
@@ -325,6 +323,9 @@ class ImportBookView(View):
                 # Hack to break out of outer loop
                 if identifier:
                     book_exists = True
+                    error_msg = (
+                        f'Book with {type}: {value} already exists.'
+                    )
                     break
                 else:
                     # Idents that we will want to save, but need a book
@@ -332,7 +333,7 @@ class ImportBookView(View):
                     ident_instances.append(Identifier(type=type, value=value))
 
             if book_exists:
-                continue
+                return render(request, 'book_list.html', {"error_msg": error_msg})
 
             # authors is a list; a book can sometimes miss authors as well.
             authors = ','.join(item.get('authors', []))
@@ -371,7 +372,8 @@ class ImportBookView(View):
         return render(
             request,
             'book_list.html',
-            {'success_msg': success_msg}
+            {'success_msg': success_msg},
+            {'error_msg': error_msg}
         )
 
     def call_google_api(self, keywords_fields):

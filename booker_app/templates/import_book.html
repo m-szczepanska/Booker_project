@@ -26,6 +26,10 @@
                 {% if error_msg %}
                     <p class="error_msg">{{ error_msg }}</p>
                 {% endif %}
+                {% if success_msg %}
+                    <p class="success_msg">{{ success_msg }}</p>
+                {% endif %}
+
             {% if form %}
             <div class="container">
                 <div class="row justify-content-md-left">

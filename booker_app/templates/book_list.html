@@ -28,7 +28,9 @@
     <hr>
         {% if error_msg %}
             <p class="error_msg">{{ error_msg }}</p>
-        {% elif success_msg %}
+        {% endif %}
+
+        {% if success_msg %}
             <p class="success_msg">{{ success_msg }}</p>
         {% endif %}
 
