@@ -76,6 +76,15 @@ class BookForm(forms.Form):
 
 
 class BookFormEdit(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(BookFormEdit, self).__init__(*args, **kwargs)
+        self.fields['authors'].widget.attrs['size'] = 30
+        self.fields['title'].widget.attrs['size'] = 30
+        self.fields['pub_date'].widget.attrs['size'] = 30
+        self.fields['language'].widget.attrs['size'] = 30
+        self.fields['page_count'].widget.attrs['size'] = 30
+        self.fields['cover_image_adress'].widget.attrs['size'] = 30
+
     class Meta:
         model = Book
         fields = [
