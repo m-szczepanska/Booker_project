@@ -1,0 +1,83 @@
+{% include 'partials/header.html' %}
+{% load static %}
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <a class="navbar-brand" href="/booker_app/book_list">Booker App</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarCollapse">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/booker_app/add_book">Add a book</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/booker_app/import_book">Import a book</a>
+      </li>
+    </ul>
+    <form class="form-inline mt-2 mt-md-0" action="." method="post">
+        {% csrf_token %}
+      <input class="form-control mr-sm-2" id="id_search_field" name="search_field" placeholder="Search" aria-label="Search">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form>
+  </div>
+</nav>
+
+<main role="main" class="container">
+  <div class="jumbotron">
+    <h2>Book list</h2>
+    <hr>
+    {% if book_list %}
+    <div class="container">
+        <div class="row justify-content-md-left">
+        <ol>
+          <div class="col-8 my-2">
+              {% for book in book_list %}
+                <li>
+                    Title: {{ book.title}},
+                    <br>
+                    Authors: {{ book.authors }},
+                    <br>
+                    Published date: {{ book.pub_date }},
+                    <br>
+                    Language: {{ book.language }},
+                    <br>
+                    Page count: {{ book.page_count }},
+                    <br>
+                        {% for ident in book.identifier_display %}
+                        Identifier: {{ ident }},
+                        {% endfor %}
+                    <br>
+
+                    {% if book.cover_image_adress %}
+                    <div class='cover_image_adress'>
+                    <a href="{{ book.cover_image_adress }}">
+                        <img src="{{ book.cover_image_adress }}"
+                        alt="Book cover adress not available"">
+                    </a>
+                    </div>
+                    {% endif %}
+
+                    <a class='details' href="/booker_app/book_details/{{ book.id }}">
+                        Click to see details</a>
+                </li>
+                <hr>
+                {% endfor %}
+                </div>
+            </ol>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        {% if error_msg %}
+            {{ error_msg }}
+         {% elif success_msg %}
+            {{ success_msg }}
+        {% else %}
+        <p>No books found.</p>
+        {% endif %}
+    {% endif %}
+
+  </div>
+</main>
+
+{% include 'partials/footer.html' %}

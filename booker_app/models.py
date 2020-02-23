@@ -17,7 +17,7 @@ class Book(models.Model):
     """
     authors = models.CharField(max_length=MAX_STR_LEN)
     title = models.CharField(max_length=MAX_STR_LEN)
-    pub_date = models.DateField('date published')
+    pub_date = models.DateField('date published', blank=True, null=True)
     page_count = models.IntegerField(blank=True, null=True)
     language = models.CharField(max_length=2)
     cover_image_adress = models.CharField(max_length=MAX_STR_LEN, blank=True, null=True)

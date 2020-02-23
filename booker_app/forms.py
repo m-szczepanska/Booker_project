@@ -1,3 +1,4 @@
+from datetime import datetime
 from django import forms
 from django.core.exceptions import ValidationError
 
@@ -5,7 +6,76 @@ from booker_app.models import Book, Identifier
 from booker.settings import MAX_STR_LEN
 
 
-class BookForm(forms.ModelForm):
+class BookForm(forms.Form):
+    authors = forms.CharField(
+        max_length=MAX_STR_LEN,
+        label='Authors',
+        widget=forms.TextInput(
+                 attrs={'size':'30', 'class':'inputText'}
+        )
+    )
+    title = forms.CharField(
+        max_length=MAX_STR_LEN,
+        label='Title',
+        widget=forms.TextInput(
+                 attrs={'size':'30', 'class':'inputText'}
+        )
+    )
+    pub_date = forms.CharField(
+        required=False,
+        label='Publication date (YYYY-MM-DD)',
+        widget=forms.TextInput(
+                 attrs={'size':'30', 'class':'inputText'}
+        )
+    )
+    page_count = forms.IntegerField(
+        label='Page count',
+        required=False,
+        widget=forms.TextInput(
+                 attrs={'size':'30', 'class':'inputText'}
+        )
+    )
+    language = forms.CharField(
+        max_length=2,
+        help_text='2 letters format, eg. "en", "pl"',
+        label='Language',
+        widget=forms.TextInput(
+                 attrs={'size':'30', 'class':'inputText'}
+        )
+    )
+    cover_image_adress = forms.URLField(
+        max_length=MAX_STR_LEN,
+        required=False,
+        label='Cover image adress',
+        widget=forms.TextInput(
+                 attrs={'size':'30', 'class':'inputText'}
+        )
+    )
+
+    def clean(self):
+        cleaned = self.cleaned_data
+        check_date_pub = cleaned.get('pub_date')
+        if len(check_date_pub) < 1:
+            check_date_pub = None
+        elif len(check_date_pub) == 4:
+            check_date_pub += '-01-01'
+            check_date_pub = datetime.strptime(check_date_pub, '%Y-%m-%d')
+        elif len(check_date_pub) > 4 and len(check_date_pub) < 8:
+            check_date_pub += '-01'
+            check_date_pub = datetime.strptime(check_date_pub, '%Y-%m-%d')
+
+        cleaned = {
+            'authors': cleaned.get('authors'),
+            'title': cleaned.get('title'),
+            'pub_date': check_date_pub,
+            'page_count': cleaned.get('page_count'),
+            'language': cleaned.get('language'),
+            'cover_image_adress': cleaned.get('cover_image_adress')
+        }
+        return cleaned
+
+
+class BookFormEdit(forms.ModelForm):
     class Meta:
         model = Book
         fields = [
@@ -19,14 +89,17 @@ class BookForm(forms.ModelForm):
 
 
 class IdentifierForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(IdentifierForm, self).__init__(*args, **kwargs)
+        self.fields['value'].widget.attrs['size'] = 30
+
     class Meta:
         model = Identifier
         fields = ['type', 'value']
 
 
 class SearchBookForm(forms.Form):
-    search_field = forms.CharField(max_length=100, label='Search')
-    json = forms.BooleanField(required=False,initial=False,label='Show results in json')
+    search_field = forms.CharField(max_length=MAX_STR_LEN, label='Search')
 
 
 class ImportBookForm(forms.Form):
@@ -39,11 +112,16 @@ class ImportBookForm(forms.Form):
         ('lccn', 'lccn'),
         ('oclc', 'oclc')
     ]
-    search_authors = forms.CharField(max_length=100, label='Search in authors', required=False)
-    search_title = forms.CharField(max_length=100, label='Search in title', required=False)
-    search_isbn = forms.CharField(max_length=100, label='Search in isbn', required=False)
-    search_lccn = forms.CharField(max_length=100, label='Search in lccn', required=False)
-    search_oclc = forms.CharField(max_length=100, label='Search in oclc', required=False)
+    search_authors = forms.CharField(
+        max_length=MAX_STR_LEN, label='Search in authors', required=False)
+    search_title = forms.CharField(
+        max_length=MAX_STR_LEN, label='Search in title', required=False)
+    search_isbn = forms.CharField(
+        max_length=MAX_STR_LEN, label='Search in isbn', required=False)
+    search_lccn = forms.CharField(
+        max_length=MAX_STR_LEN, label='Search in lccn', required=False)
+    search_oclc = forms.CharField(
+        max_length=MAX_STR_LEN, label='Search in oclc', required=False)
 
     def clean(self):
         cleaned = self.cleaned_data

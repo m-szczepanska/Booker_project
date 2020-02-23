@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 from django.views import View
 
 from booker_app.forms import (BookForm, IdentifierForm, SearchBookForm,
-    ImportBookForm
+    ImportBookForm, BookFormEdit
 )
 from booker_app.models import Book, Identifier
 
@@ -34,11 +34,6 @@ class BookView(View):
             Q(language__icontains=search_phrase) |
             Q(pub_date__icontains=search_phrase)
         )
-        search_result_json = form.cleaned_data['json']
-
-        if search_result_json:
-            search_result_rest = list(search_result.values())
-            return JsonResponse(search_result_rest, safe=False)
 
         context = {'book_list': search_result}
         return render(request, 'book_list.html', context)
@@ -69,7 +64,7 @@ class BookDetailsView(View):
         book = Book.objects.get(id=book_id)
         if not book:
             return HttpResponseNotFound('<h1>Book not found</h1>')
-        form_book = BookForm(
+        form_book = BookFormEdit(
             initial={
                 'authors': book.authors,
                 'title': book.title,
@@ -97,7 +92,7 @@ class BookDetailsView(View):
         book = Book.objects.get(id=book_id)
         if not book:
             return HttpResponseNotFound('<h1>Book not found</h1>')
-        form_book = BookForm(
+        form_book = BookFormEdit(
             request.POST,
             initial={
                 'authors': book.authors,
@@ -155,7 +150,17 @@ class BookFormView(View):
         form_ident = IdentifierForm(request.POST)
 
         if form_book.is_valid():
-            new_book = form_book.save()
+
+            new_book = Book(
+                authors=form_book.cleaned_data['authors'],
+                title=form_book.cleaned_data['title'],
+                pub_date=form_book.cleaned_data['pub_date'],
+                page_count=form_book.cleaned_data['page_count'],
+                language=form_book.cleaned_data['language'],
+                cover_image_adress=form_book.cleaned_data['cover_image_adress']
+            )
+            new_book.save()
+
             if form_ident.is_valid():
                 ident = form_ident.save(commit=False)
                 ident.book=new_book
@@ -242,7 +247,7 @@ class ImportBookView(View):
             # authors is a list; a book can sometimes miss authors as well.
             authors = ','.join(item.get('authors', []))
             title = item['title']
-            pub_date = self.clean_date(item.get('publishedDate'))
+            pub_date = self.clean_date(item.get('publishedDate'), '')
             page_count = item.get('pageCount')  # optional
             language = item.get('language')
             cover_image_adress = item.get('imageLinks', {}).get('thumbnail')
