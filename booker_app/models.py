@@ -55,6 +55,10 @@ class Identifier(models.Model):
     )
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return (f'{self.type}: {self.value}')
+
+
     def save(
         self,
         force_insert=False,

@@ -31,7 +31,7 @@ class BookForm(forms.Form):
     page_count = forms.IntegerField(
         label='Page count',
         required=False,
-        widget=forms.TextInput(
+        widget=forms.NumberInput(
                  attrs={'size':'30', 'class':'inputText'}
         )
     )
@@ -97,14 +97,35 @@ class BookFormEdit(forms.ModelForm):
         ]
 
 
-class IdentifierForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(IdentifierForm, self).__init__(*args, **kwargs)
-        self.fields['value'].widget.attrs['size'] = 30
-
-    class Meta:
-        model = Identifier
-        fields = ['type', 'value']
+class IdentifierForm(forms.Form):
+    ISBN_10 = forms.CharField(
+        max_length=MAX_STR_LEN,
+        required=False,
+        widget=forms.TextInput(
+            attrs={'size':'30', 'class':'inputText'}
+        )
+    )
+    ISBN_13 = forms.CharField(
+        max_length=MAX_STR_LEN,
+        required=False,
+        widget=forms.TextInput(
+            attrs={'size':'30', 'class':'inputText'}
+        )
+    )
+    ISSN = forms.CharField(
+        max_length=MAX_STR_LEN,
+        required=False,
+        widget=forms.TextInput(
+            attrs={'size':'30', 'class':'inputText'}
+        )
+    )
+    OTHER = forms.CharField(
+        max_length=MAX_STR_LEN,
+        required=False,
+        widget=forms.TextInput(
+            attrs={'size':'30', 'class':'inputText'}
+        )
+    )
 
 
 class SearchBookForm(forms.Form):

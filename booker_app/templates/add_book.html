@@ -16,11 +16,6 @@
         <a class="nav-link" href="/booker_app/import_book">Import a book</a>
       </li>
     </ul>
-    <form class="form-inline mt-2 mt-md-0" action="." method="post">
-        {% csrf_token %}
-      <input class="form-control mr-sm-2" id="id_search_field" name="search_field" placeholder="Search" aria-label="Search">
-      <button class="btn btn-outline-info my-2 my-sm-0" type="submit">Search</button>
-    </form>
   </div>
 </nav>
 
@@ -50,12 +45,20 @@
               <div class="col-3 col-sm-2 my-2">Cover adress image</div>
               <div class="col-3 col-sm-2 my-2">{{ form_book.cover_image_adress }}</div>
               <div class="w-100"></div>
-              <div class="col-3 col-sm-2 my-2">Identifier type</div>
-              <div class="col-3 col-sm-2 my-2">{{ form_ident.type }}</div>
+
+              <div class="col-3 col-sm-2 my-2">ISBN 10</div>
+              <div class="col-3 col-sm-2 my-2">{{ form_ident.ISBN_10 }}</div>
               <div class="w-100"></div>
-              <div class="col-3 col-sm-2 my-2">Identifier value</div>
-              <div class="col-3 col-sm-2 my-2">{{ form_ident.value }}</div>
+              <div class="col-3 col-sm-2 my-2">ISBN 13</div>
+              <div class="col-3 col-sm-2 my-2">{{ form_ident.ISBN_13 }}</div>
               <div class="w-100"></div>
+              <div class="col-3 col-sm-2 my-2">ISSN</div>
+              <div class="col-3 col-sm-2 my-2">{{ form_ident.ISSN }}</div>
+              <div class="w-100"></div>
+              <div class="col-3 col-sm-2 my-2">OTHER</div>
+              <div class="col-3 col-sm-2 my-2">{{ form_ident.OTHER }}</div>
+              <div class="w-100"></div>
+
               <div class="col-3 col-sm-2 my-2">
                   <button type="submit" class="save btn btn-info">
                       Add book
@@ -64,6 +67,10 @@
         </div>
     </div>
     </form>
+    {% if msg %}
+    <br>
+        <p>{{ msg }}</p>
+    {% endif %}
   </div>
 </main>
 
