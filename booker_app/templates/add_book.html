@@ -25,6 +25,9 @@
         {% csrf_token %}
         <h2>Add book</h2>
         <hr>
+            {% if error_msg %}
+                <p class="error_msg">{{ error_msg }}</p>
+            {% endif %}
         <div class="container">
             <div class="row justify-content-md-left">
               <div class="col-3 col-sm-2 my-2">Title</div>
@@ -67,10 +70,6 @@
         </div>
     </div>
     </form>
-    {% if msg %}
-    <br>
-        <p>{{ msg }}</p>
-    {% endif %}
   </div>
 </main>
 

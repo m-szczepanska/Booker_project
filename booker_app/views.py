@@ -131,15 +131,26 @@ class BookDetailsView(View):
                             value=form_ident.cleaned_data[ident_value],
                             book=book
                             ).save()
-                        return redirect('book_list')
+                        success_msg = 'Book updated successfully'
+                        context = {
+                            'form_book': form_book,
+                            'form_ident': form_ident,
+                            'success_msg': success_msg
+                        }
+                        return render(request, 'book_details.html', context)
             else:
                 invalid_indent_form = "Updating failed. Invalid indentifier."
                 context = {'invalid_indent_form': invalid_indent_form}
-                return render(request, 'book_details', context)
+                return render(request, 'book_details.html', context)
 
         else:
-            context = {'form_book': form_book, 'form_ident': form_ident}
-            return render(request, 'book_details', context)
+            success_msg = 'Book updated successfully'
+            context = {
+                'form_book': form_book,
+                'form_ident': form_ident,
+                'success_msg': success_msg
+            }
+            return render(request, 'book_details.html', context)
 
 
 class BookFormView(View):
@@ -187,7 +198,7 @@ class BookFormView(View):
                 {
                     'form_book': form_book,
                     'form_ident': form_ident,
-                    'msg': error_msg
+                    'error_msg': error_msg
                 }
             )
 

@@ -21,6 +21,13 @@
   <div class="jumbotron">
       <h2>Book details</h2>
       <hr>
+        {% if not_found_msg %}
+            <p class="error_msg">{{ not_found_msg }}</p>
+        {% endif %}
+        {% if success_msg %}
+            <p class="success_msg">{{ success_msg }}</p>
+        {% endif %}
+
     {% if form_book %}
         <form action='.' method="post">
             {% csrf_token %}
@@ -67,18 +74,14 @@
            </div>
         </div>
         </form>
+        {% endif %}
             <div class="col-3 col-sm-2 my-2">
                 <form action='delete_book/' method="post">
                     {% csrf_token %}
                     <button type="submit" class="save btn btn-warning">Delete book</button>
                 </form>
            </div>
+  </div>
 
-            </div>
-    {% elif not_found_msg %}
-        <p>{{ not_found_msg }}.</p>
-    {% else %}
-        <p>The book wasn't added yet.</p>
-    {% endif %}
 </main>
 {% include 'partials/footer.html' %}

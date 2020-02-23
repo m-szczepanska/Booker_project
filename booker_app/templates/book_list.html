@@ -26,6 +26,12 @@
   <div class="jumbotron">
     <h2>Book list</h2>
     <hr>
+        {% if error_msg %}
+            <p class="error_msg">{{ error_msg }}</p>
+        {% elif success_msg %}
+            <p class="success_msg">{{ success_msg }}</p>
+        {% endif %}
+
     {% if book_list %}
     <div class="container">
         <div class="row justify-content-md-left">
@@ -61,14 +67,7 @@
         {% endfor %}
         </div>
     </div>
-    {% else %}
-        {% if error_msg %}
-            {{ error_msg }}
-         {% elif success_msg %}
-            {{ success_msg }}
-        {% else %}
-        <p>Any book wasn't added yet.</p>
-        {% endif %}
+
     {% endif %}
 
   </div>

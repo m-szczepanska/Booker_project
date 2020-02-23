@@ -23,6 +23,9 @@
         {% csrf_token %}
         <h2>Search and import a book </h2>
             <hr>
+                {% if error_msg %}
+                    <p class="error_msg">{{ error_msg }}</p>
+                {% endif %}
             {% if form %}
             <div class="container">
                 <div class="row justify-content-md-left">
@@ -45,8 +48,6 @@
                       <button type="submit" class="save btn btn-info">
                           Import book
                       </button>
-            {% else %}
-                {{ error_msg }}
             {% endif %}
     </form>
   </div>
